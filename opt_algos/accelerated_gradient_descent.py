@@ -61,7 +61,7 @@ def accelerated_gradient_descent(model, eta, max_iterations=1e4, epsilon=1e-5,
         y_current = y_next
         t_current = t_next
 
-    print 'accelerated GD finished after ' + str(k) + ' iterations'
+    print('accelerated GD finished after ' + str(k) + ' iterations')
 
     return {'solution': beta_current,
             'beta_history': beta_history}

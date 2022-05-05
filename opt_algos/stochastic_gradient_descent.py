@@ -56,7 +56,7 @@ def stochastic_gradient_descent(model, eta, batch_size=1, max_iterations=1e4,
 
         beta_current = beta_next
 
-    print 'SGD finished after ' + str(k) + ' iterations'
+    print('SGD finished after ' + str(k) + ' iterations')
 
     return {'solution': beta_current,
             'beta_history': beta_history}

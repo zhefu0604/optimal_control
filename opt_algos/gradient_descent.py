@@ -48,7 +48,7 @@ def gradient_descent(model, eta, max_iterations=1e4, epsilon=1e-5,
 
         beta_current = beta_next
 
-    print 'GD finished after ' + str(k) + ' iterations'
+    print('GD finished after ' + str(k) + ' iterations')
 
     return {'solution': beta_current,
             'beta_history': beta_history}
