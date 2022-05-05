@@ -4,7 +4,7 @@ import numpy as np
 
 
 class OptimalControl(object):
-    def __init__(self, time, x0, v0, vl):
+    def __init__(self, time, x0, v0, xl, vl):
         # Fuel model parameters
         self.C0 = 0.245104874164936
         self.C1 = 0.00389174029574479
@@ -24,7 +24,7 @@ class OptimalControl(object):
         self.del_t = self.time[-1]/self.d
         self.x0 = x0
         self.v0 = v0
-        # self.xl = xl
+        self.xl = xl
         self.vl = vl
 
 
@@ -82,15 +82,15 @@ class OptimalControl(object):
             # U = np.convolve(np.ones(200), np.ones(50)/50, mode=m));
         return np.append(U, U[-1])
 
-    def constraints(self, mode = "smooth"): ## Au <= b
+    def constraints(self, eps = 5, gamma = 120): ## Au <= b
         T = self.del_t * np.ones([self.d, self.d])
         T[0, :] = 0
         T = np.tril(T)
-        TT = np.matmul(T,T) 
+        TT = T @ T
         A = np.concatenate((TT, -TT,  -T), axis=0)
         b = np.concatenate((self.xl - self.x0 - self.v0 * self.time - eps, 
             gamma - self.xl + self.x0 + self.v0 * self.time, 
-            v0 * np.ones((nt, 1))), axis=0)
+            self.v0 * np.ones(self.d)), axis=0)
         return A, b
 
 
