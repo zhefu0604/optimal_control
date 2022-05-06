@@ -18,10 +18,7 @@ def projector(y, A, b):
     """
     n = len(y)
     H = np.identity(n)
-
-    #TODO: check the usage of qp.solve
-    x = qp.solve_qp(H, y, -A, -b, 0)
-
+    x, _, _, _, _, _ = qp.solve_qp(H, y, -A, -b, 0)
     return x
 
 def projected_gradient_descent(model, eta, max_iterations=1e4, epsilon=1e-5,
@@ -78,6 +75,7 @@ def projected_gradient_descent(model, eta, max_iterations=1e4, epsilon=1e-5,
             break
 
         x_current = x_next
+        print("Objective value = ", model.F(x_current))
 
     print('GD finished after ' + str(k) + ' iterations')
 
