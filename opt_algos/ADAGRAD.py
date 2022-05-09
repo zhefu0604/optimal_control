@@ -67,8 +67,8 @@ def project_x(x_current, grad, D, A, b):
     return x
 
 
-def ADAGRAD_plus (model, max_iterations=1e4, epsilon=1e-5,
-                   x0=None, A=None, b=None):
+def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
+                   x0=None, A=None, b=None, R=None):
     """
     ref: Adaptive Gradient Methods for Constrained Convex Optimization and Variational Inequalities
 
@@ -98,37 +98,49 @@ def ADAGRAD_plus (model, max_iterations=1e4, epsilon=1e-5,
 
     # initialization of D0 and R
     D_current = np.identity(len(x_current))
-    R = find_R(x_current, A, b)
+    # R = find_R(x_current, A, b)
 
     # keep track of history
-    x_history = []
-    x_return_lst = []
+    x_history = x_current
+    # x_return_lst = []
 
     for k in range(int(max_iterations)):
 
-        x_history.append(x_current)
+        print("Objective value = ", model.F(x_current))
+
+        # x_history.append(x_current)
 
         # next x
-        x_next = project_x(x_current, grad_F, D_current, A, b)
+        x_next = project_x(x_current, grad_F(x_current), D_current, A, b)
 
         # next D
-        D_next = np.identity(len(x_current))
-        for i in D_next.shape[0]:
-            D_next[i,i] = D_current[i,i] * np.sqrt(1 + np.square(x_next[i] - x_current[i])/R**2)
+        D_next = D_current + np.diag(np.sqrt(1 + np.square(x_next - x_current)/R**2))
+
+        # D_next = np.identity(len(x_current))
+        # for i in D_next.shape[0]:
+        #     D_next[i,i] = D_current[i,i] * np.sqrt(1 + np.square(x_next[i] - x_current[i])/R**2)
 
         # returned x
-        x_return = sum(x_history)/k
-        x_return_lst.append(x_return)
+        # x_return = sum(x_history)/k
+        # x_return_lst.append(x_return)
+        
 
         # relative error stopping condition
-        if (k > 0) & (np.linalg.norm(x_return - x_return_lst[k-1]) <= epsilon*np.linalg.norm(x_return)):
+        # if (k > 0) & (np.linalg.norm(x_return - x_return_lst[k-1]) <= epsilon*np.linalg.norm(x_return)):
+        #     break
+
+        x_history = x_history + x_current
+        # print("R = ", np.linalg.norm(x_next - x_current, ord = np.inf))
+
+        if (k > 0) & (np.linalg.norm(x_next - x_current) <= epsilon*np.linalg.norm(x_current)):
             break
+        
 
         x_current = x_next
         D_current = D_next
 
     print('ADAGRAD+ finished after ' + str(k) + ' iterations')
 
-    return {'solution': x_return,
-            'x_history': x_history,
-            'x_return_lst': x_return_lst}
+    return {'solution': x_history/k}
+            # 'x_history': x_history,
+            # 'x_return_lst': x_return_lst}
