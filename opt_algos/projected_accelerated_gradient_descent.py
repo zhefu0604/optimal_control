@@ -74,7 +74,7 @@ def accelerated_gradient_descent(model, eta, max_iterations=1e4, epsilon=1e-5,
         # projection
         x_next = projector(z_next, A, b)
 
-        # relative error stoping condition
+        # relative error stopping condition
         if np.linalg.norm(x_next - x_current) <= epsilon*np.linalg.norm(x_current):
             break
 
@@ -88,7 +88,9 @@ def accelerated_gradient_descent(model, eta, max_iterations=1e4, epsilon=1e-5,
         z_current = z_next
         t_current = t_next
 
+        print("Objective value = ", model.F(x_current))
+
     print('accelerated GD finished after ' + str(k) + ' iterations')
 
     return {'solution': x_current,
-            'beta_history': x_history}
+            'x_history': x_history}

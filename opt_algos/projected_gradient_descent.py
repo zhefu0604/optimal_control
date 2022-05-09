@@ -69,7 +69,7 @@ def projected_gradient_descent(model, eta, max_iterations=1e4, epsilon=1e-5,
         # project the solution to the convex set
         x_next = projector(y_next, A, b)
 
-        # relative error stoping condition
+        # relative error stopping condition
         if np.linalg.norm(x_next - x_current) <= epsilon*np.linalg.norm(x_current):
             #  if np.linalg.norm(beta_next) <= epsilon:
             break
@@ -80,4 +80,4 @@ def projected_gradient_descent(model, eta, max_iterations=1e4, epsilon=1e-5,
     print('GD finished after ' + str(k) + ' iterations')
 
     return {'solution': x_current,
-            'beta_history': x_history}
+            'x_history': x_history}
