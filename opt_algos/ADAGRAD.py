@@ -95,23 +95,26 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
 
     # make sure the initial  iterate is feasible
     x_current = projector(y_current, A, b)
+    print(x_current)
 
     # initialization of D0 and R
     D_current = np.identity(len(x_current))
     # R = find_R(x_current, A, b)
 
     # keep track of history
-    x_history = x_current
+    x_history = []
+    x_output = x_current
     # x_return_lst = []
 
     for k in range(int(max_iterations)):
 
         print("Objective value = ", model.F(x_current))
 
-        # x_history.append(x_current)
+        x_history.append(x_current)
 
         # next x
         x_next = project_x(x_current, grad_F(x_current), D_current, A, b)
+        # print(x_next)
 
         # next D
         D_next = D_current + np.diag(np.sqrt(1 + np.square(x_next - x_current)/R**2))
@@ -129,11 +132,11 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
         # if (k > 0) & (np.linalg.norm(x_return - x_return_lst[k-1]) <= epsilon*np.linalg.norm(x_return)):
         #     break
 
-        x_history = x_history + x_current
+        x_output = x_output + x_current
         # print("R = ", np.linalg.norm(x_next - x_current, ord = np.inf))
 
-        if (k > 0) & (np.linalg.norm(x_next - x_current) <= epsilon*np.linalg.norm(x_current)):
-            break
+        # if (k > 0) & (np.linalg.norm(x_next - x_current) <= epsilon*np.linalg.norm(x_current)):
+        #     break
         
 
         x_current = x_next
@@ -141,6 +144,6 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
 
     print('ADAGRAD+ finished after ' + str(k) + ' iterations')
 
-    return {'solution': x_history/k}
-            # 'x_history': x_history,
+    return {'solution': x_output/k, 
+            'x_history': x_history}
             # 'x_return_lst': x_return_lst}

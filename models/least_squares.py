@@ -14,10 +14,8 @@ class LeastSquares(object):
     """
 
     def __init__(self, X, y):
-    
-    	self.name = "least squares"
+        self.name = "least squares"
 
-        # data
         self.X = X
         self.y = y
 
@@ -59,7 +57,7 @@ class LeastSquaresL2(object):
     """
 
     def __init__(self, X, y, alpha):
-    	self.name = "least squares with L2 penalty"
+        self.name = "least squares with L2 penalty"
 
         # data
         self.X = X
