@@ -105,7 +105,8 @@ def ADAAGD_plus(model, max_iterations=1e4, epsilon=1e-5,
 
     # initialization of D1 and R
     D_current = np.identity(len(z0))
-    R = find_R(z0, A, b)
+    if R is None:
+        R = find_R(z0, A, b)
 
     # keep track of x
     x_history = []

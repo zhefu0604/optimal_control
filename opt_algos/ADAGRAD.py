@@ -98,7 +98,8 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
 
     # initialization of D0 and R
     D_current = np.identity(len(x_current))
-    R = find_R(x_current, A, b)
+    if R is None:
+        R = find_R(x_current, A, b)
 
     # keep track of history
     x_history = []
