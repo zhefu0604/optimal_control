@@ -1,5 +1,7 @@
 import numpy as np
 import quadprog as qp
+import cvxpy as cvx
+import dccp
 
 def projector(y, A, b):
     """
@@ -21,12 +23,13 @@ def projector(y, A, b):
     x, _, _, _, _, _ = qp.solve_qp(H, y, -A, -b, 0)
     return x
 
-def find_R(x, A, b):
+def find_R(z, A, b):
     """
+    ref: https://github.com/cvxgrp/dccp
 
     Parameters
     ----------
-    x: a possible solution in the convex set
+    z: a possible solution in the convex set
     A: the matrix in constraints
     b: the value vector in constrains
 
@@ -35,16 +38,12 @@ def find_R(x, A, b):
     R: the maximum value of (x - y) norm 2. Or the negative of minimum value of - (x - y) norm 2
 
     """
-    n = len(x)
-    I = np.identity(n)
-    H = np.block([
-        [I, -I],
-        [-I, I]
-    ])
-    # TODO: figure out the right params to fill in
-    _, value, _, _, _, _ = qp.solve_qp(-H, 0, np.hstack(-A, -A), np.stack(-b, -b), 0)
-    R = -value
-    return R
+    x = cvx.Variable(z.shape)
+    y = cvx.Variable(z.shape)
+
+    prob = cvx.Problem(cvx.Maximize(cvx.norm(x - y, 2)), [A@x <= b, A@y <= b])
+    result = prob.solve(method='dccp')
+    return result[0]
 
 def project_z(x_history, grad_F, z0, D, A, b):
     """
@@ -106,7 +105,7 @@ def ADAAGD_plus(model, max_iterations=1e4, epsilon=1e-5,
 
     # initialization of D1 and R
     D_current = np.identity(len(z0))
-    # R = find_R(x_current, A, b)
+    R = find_R(z0, A, b)
 
     # keep track of x
     x_history = []
