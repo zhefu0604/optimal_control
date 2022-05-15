@@ -124,7 +124,7 @@ class OptimalControlConvex(object):
 
     def F(self, U):
         X, V = self.system_solve(U)
-        E = V**2 + U**2
+        E = 1e-3*V**2 + U**2
         z = self.del_t * np.sum(E)
         return z
 
@@ -135,7 +135,7 @@ class OptimalControlConvex(object):
         PQ = np.flip(sol.y)
         P = PQ[0, :]
         Q = PQ[1, :]
-        dz = -1 * Q + 2 * U**2
+        dz = -1 * Q + 2 * U
         return dz
 
 
@@ -156,7 +156,7 @@ class OptimalControlConvex(object):
     def f_adjoint(self, t, PQ): 
         P = PQ[0]
         P_dot = 0
-        Q_dot = 2 * self.V(t) - P
+        Q_dot = 1e-3*2 * self.V(t) - P
         
         return np.array([P_dot, Q_dot])
 

@@ -105,7 +105,7 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
     if R is None:
         #print(1)
         R = find_R(x_current, A.T, b)
-    #print(R)
+    print(R)
 
     # keep track of history
     x_history = []
@@ -143,8 +143,8 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
         x_output = x_output + x_current
         # print("R = ", np.linalg.norm(x_next - x_current, ord = np.inf))
 
-        # if (k > 0) & (np.linalg.norm(x_next - x_current) <= epsilon*np.linalg.norm(x_current)):
-        #     break
+        if (k > 0) & (np.linalg.norm(x_next - x_current) <= epsilon*np.linalg.norm(x_current)):
+            break
         
 
         x_current = x_next
