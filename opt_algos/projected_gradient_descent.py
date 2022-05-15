@@ -58,10 +58,14 @@ def projected_gradient_descent(model, eta, max_iterations=1e4, epsilon=1e-5,
 
     # keep track of history
     x_history = []
+    f_history = []
 
     for k in range(int(max_iterations)):
 
-        x_history.append(x_current)
+        x_history.append(x_current.tolist())
+        f = model.F(x_current)
+        f_history.append(f)
+        print("Objective value = ", f)
 
         # gradient update
         y_next = x_current - eta * grad_F(x_current)
@@ -71,13 +75,12 @@ def projected_gradient_descent(model, eta, max_iterations=1e4, epsilon=1e-5,
 
         # relative error stopping condition
         if np.linalg.norm(x_next - x_current) <= epsilon*np.linalg.norm(x_current):
-            #  if np.linalg.norm(beta_next) <= epsilon:
             break
 
         x_current = x_next
-        print("Objective value = ", model.F(x_current))
 
     print('GD finished after ' + str(k) + ' iterations')
 
-    return {'solution': x_current,
-            'x_history': x_history}
+    return {'solution': x_current.tolist(),
+            'x_history': x_history, 
+            'f_history': f_history}
