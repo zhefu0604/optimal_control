@@ -82,15 +82,17 @@ class OptimalControl(object):
             # U = np.convolve(np.ones(200), np.ones(50)/50, mode=m));
         return np.append(U, U[-1])
 
-    def constraints(self, eps = 5, gamma = 120): ## Au <= b
+    def constraints(self, eps = 5, gamma = 120, u_max = 5, u_min = -5): ## Au <= b
         T = self.del_t * np.ones([self.d, self.d])
         T[0, :] = 0
         T = np.tril(T)
         TT = T @ T
-        A = np.concatenate((TT, -TT,  -T), axis=0)
+        A = np.concatenate((TT, -TT,  -T, np.identity(self.d), -np.identity(self.d)), axis=0)
         b = np.concatenate((self.xl - self.x0 - self.v0 * self.time - eps, 
             gamma - self.xl + self.x0 + self.v0 * self.time, 
-            self.v0 * np.ones(self.d)), axis=0)
+            self.v0 * np.ones(self.d), 
+            u_max * np.ones(self.d), 
+            -u_min * np.ones(self.d)), axis=0)
         return A, b
 
 
