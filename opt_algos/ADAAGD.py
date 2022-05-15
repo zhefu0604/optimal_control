@@ -106,10 +106,13 @@ def ADAAGD_plus(model, max_iterations=1e4, epsilon=1e-5,
     # initialization of D1 and R
     D_current = np.identity(len(z0))
     if R is None:
-        R = find_R(z0, A, b)
+        R = find_R(z0, A.T, b)
+        #print(R)
 
     # keep track of x
     x_history = []
+    objective_history = []
+    y_history = []
 
     for k in range(1, int(max_iterations)):
 
@@ -121,14 +124,17 @@ def ADAAGD_plus(model, max_iterations=1e4, epsilon=1e-5,
         z_current = project_z(x_history, grad_F, z0, D_current, A, b)
 
         y_current = (k-1)/(k+1) * y_previous + a_current/A_current * z_current
+        y_history.append(y_current)
 
-        print("Objective value = ", model.F(y_current))
+        objective = model.F(y_current)
+        objective_history.append(objective)
+        print("Objective value = ", objective)
 
         # next D
         D_next = D_current + np.diag(np.sqrt(1 + np.square(z_current - z_previous)/R**2))
 
-        if np.linalg.norm(y_current - y_previous) <= epsilon*np.linalg.norm(y_previous):
-            break
+        # if np.linalg.norm(y_current - y_previous) <= epsilon*np.linalg.norm(y_previous):
+        #     break
 
         y_previous = y_current
         z_previous = z_current
@@ -136,4 +142,7 @@ def ADAAGD_plus(model, max_iterations=1e4, epsilon=1e-5,
 
     print('ADAAGD+ finished after ' + str(k) + ' iterations')
 
-    return {'solution': y_current}
+    return {'solution': y_current,
+            'x_history': y_history,
+            'objective_history': objective_history,
+            }

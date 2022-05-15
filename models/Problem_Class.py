@@ -156,8 +156,7 @@ class OptimalControlConvex(object):
     def f_adjoint(self, t, PQ): 
         P = PQ[0]
         P_dot = 0
-        Q_dot = 2 * 1e-2 * self.V(t) - P
-        
+        Q_dot = 2 * 1e-2 * self.V(t) - P   
         return np.array([P_dot, Q_dot])
 
 

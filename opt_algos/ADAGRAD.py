@@ -41,8 +41,12 @@ def find_R(z, A, b):
     x = cvx.Variable(z.shape)
     y = cvx.Variable(z.shape)
 
+    #print(z.shape)
+    #print(A.shape)
+
     prob = cvx.Problem(cvx.Maximize(cvx.norm(x - y, 2)), [A@x <= b, A@y <= b])
     result = prob.solve(method='dccp')
+    #print('Result is', str(result))
     return result[0]
 
 def project_x(x_current, grad, D, A, b):
@@ -94,23 +98,27 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
 
     # make sure the initial  iterate is feasible
     x_current = projector(y_current, A, b)
-    print(x_current)
+    #print(x_current)
 
     # initialization of D0 and R
     D_current = np.identity(len(x_current))
     if R is None:
-        R = find_R(x_current, A, b)
+        #print(1)
+        R = find_R(x_current, A.T, b)
+    print(R)
 
     # keep track of history
     x_history = []
     x_output = x_current
+    objective_history = []
     # x_return_lst = []
 
     for k in range(int(max_iterations)):
-
-        print("Objective value = ", model.F(x_current))
+        objective = model.F(x_current)
+        print("Objective value = ", objective)
 
         x_history.append(x_current)
+        objective_history.append(objective)
 
         # next x
         x_next = project_x(x_current, grad_F(x_current), D_current, A, b)
@@ -135,8 +143,8 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
         x_output = x_output + x_current
         # print("R = ", np.linalg.norm(x_next - x_current, ord = np.inf))
 
-        # if (k > 0) & (np.linalg.norm(x_next - x_current) <= epsilon*np.linalg.norm(x_current)):
-        #     break
+        if (k > 0) & (np.linalg.norm(x_next - x_current) <= epsilon*np.linalg.norm(x_current)):
+            break
         
 
         x_current = x_next
@@ -145,5 +153,7 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
     print('ADAGRAD+ finished after ' + str(k) + ' iterations')
 
     return {'solution': x_output/k, 
-            'x_history': x_history}
+            'x_history': x_history,
+            'objective_history': objective_history,
+            }
             # 'x_return_lst': x_return_lst}
