@@ -2,6 +2,7 @@ import numpy as np
 import quadprog as qp
 import cvxpy as cvx
 import dccp
+import time
 
 def projector(y, A, b):
     """
@@ -45,13 +46,12 @@ def find_R(z, A, b):
     result = prob.solve(method='dccp')
     return result[0]
 
-def project_z(x_history, grad_F, z0, D, A, b):
+def project_z(grad_s, z0, D, A, b):
     """
 
     Parameters
     ----------
-    x_history: x value from 1 to t
-    grad_F: gradient function
+    grad_history: gradient for each x
     z0: z0
     D: D_t
     A: the matrix in constraints
@@ -62,12 +62,7 @@ def project_z(x_history, grad_F, z0, D, A, b):
     x: the solution to this optimization problem
 
     """
-    t = len(x_history)
-    grad = np.zeros_like(grad_F(x_history[0]))
-    for i in range(t):
-        x_t = x_history[i]
-        grad += (i+1)*grad_F(x_t)
-    a = grad - z0.T@D
+    a = z0.T@D - grad_s
     x, _, _, _, _, _ = qp.solve_qp(D, a.T, -A, -b, 0)
     return x
 
@@ -113,18 +108,24 @@ def ADAAGD_plus(model, max_iterations=1e4, epsilon=1e-5,
     x_history = []
     objective_history = []
     y_history = []
+    grad_history = []
+    grad_s = np.zeros_like(z0)
 
     for k in range(1, int(max_iterations)):
-
+        t0 = time.time()
         a_current = k
         A_current = k*(k+1)/2
-        x_current= (k-1)/(k+1) * y_previous + a_current/A_current * z_previous
+        x_current = (k-1)/(k+1) * y_previous + a_current/A_current * z_previous
         x_history.append(x_current)
 
-        z_current = project_z(x_history, grad_F, z0, D_current, A, b)
+        grad = grad_F(x_current)
+        grad_history.append(grad)
+        grad_s += k * grad
+
+        z_current = project_z(grad_s, z0, D_current, A, b)
 
         y_current = (k-1)/(k+1) * y_previous + a_current/A_current * z_current
-        y_history.append(y_current)
+        y_history.append(y_current.tolist())
 
         objective = model.F(y_current)
         objective_history.append(objective)
@@ -133,8 +134,10 @@ def ADAAGD_plus(model, max_iterations=1e4, epsilon=1e-5,
         # next D
         D_next = D_current + np.diag(np.sqrt(1 + np.square(z_current - z_previous)/R**2))
 
-        # if np.linalg.norm(y_current - y_previous) <= epsilon*np.linalg.norm(y_previous):
-        #     break
+        print('time', str(time.time() - t0))
+
+        if np.linalg.norm(y_current - y_previous) <= epsilon*np.linalg.norm(y_previous):
+            break
 
         y_previous = y_current
         z_previous = z_current
@@ -142,7 +145,7 @@ def ADAAGD_plus(model, max_iterations=1e4, epsilon=1e-5,
 
     print('ADAAGD+ finished after ' + str(k) + ' iterations')
 
-    return {'solution': y_current,
+    return {'solution': y_current.tolist(),
             'x_history': y_history,
             'objective_history': objective_history,
             }

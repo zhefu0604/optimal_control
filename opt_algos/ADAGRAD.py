@@ -117,7 +117,7 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
         objective = model.F(x_current)
         print("Objective value = ", objective)
 
-        x_history.append(x_current)
+        x_history.append(x_current.tolist())
         objective_history.append(objective)
 
         # next x
@@ -126,15 +126,6 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
 
         # next D
         D_next = D_current + np.diag(np.sqrt(1 + np.square(x_next - x_current)/R**2))
-
-        # D_next = np.identity(len(x_current))
-        # for i in D_next.shape[0]:
-        #     D_next[i,i] = D_current[i,i] * np.sqrt(1 + np.square(x_next[i] - x_current[i])/R**2)
-
-        # returned x
-        # x_return = sum(x_history)/k
-        # x_return_lst.append(x_return)
-        
 
         # relative error stopping condition
         # if (k > 0) & (np.linalg.norm(x_return - x_return_lst[k-1]) <= epsilon*np.linalg.norm(x_return)):
@@ -152,7 +143,7 @@ def ADAGRAD_plus(model, max_iterations=1e4, epsilon=1e-5,
 
     print('ADAGRAD+ finished after ' + str(k) + ' iterations')
 
-    return {'solution': x_output/k, 
+    return {'solution': (x_output/k).tolist(),
             'x_history': x_history,
             'objective_history': objective_history,
             }
